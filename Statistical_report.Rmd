@@ -1,0 +1,14 @@
+---
+title: "Statistical analysis: genetics"
+author: "Houda Aiboud Benchekroun and Thomas Roiseux (group 8)"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+```{r loaddata, echo=FALSE}
+load(file = "project_park.RData")
+```
+\rule{\linewidth}{0.1pt}
+\section{General information}
+\subsection{Nature of the problem}
+
+\subsection{Variables available}

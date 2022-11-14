@@ -1,5 +1,5 @@
 ## load data
-load(file="projet_park.RData")
+load(file="project_park.RData")
 ls()
 dim(geno.df)
 geno.df[1:10,1:10]
