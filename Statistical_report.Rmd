@@ -4,8 +4,8 @@ author: "Houda Aiboud Benchekroun and Thomas Roiseux (group 8)"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
-```{r loaddata, echo=FALSE}
-load(file = "project_park.RData")
+```{r loaddata, echo=FALSE, results='hide'}
+source("read_data.R")
 ```
 \rule{\linewidth}{0.1pt}
 \section{General information}

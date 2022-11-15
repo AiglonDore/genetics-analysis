@@ -8,10 +8,10 @@ pheno.df[1:10,1:10]
 dim(Xmat)
 
 ## choose a response variable: i=1,...36
-names(rice.pheno)
+names(pheno.df)
 i = 36 # i=1, ..., 36
-y = matrix(rice.pheno[,i+2])
-yname = names(rice.pheno)[i+2]
+y = matrix(pheno.df[,i+2])
+yname = names(pheno.df)[i+2]
 rownames(y) = pheno.df$NSFTVID
 length(y)
 str(y)
@@ -32,4 +32,3 @@ table(Xmat[,j])
 # genetic marker information is given in gene.df
 dim(geno.df)
 geno.df[1:5,1:10]
-
