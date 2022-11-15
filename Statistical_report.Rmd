@@ -1,5 +1,5 @@
 ---
-title: "Statistical analysis: genetics"
+title: "Statistical analysis: rice phenotype"
 author: "Houda Aiboud Benchekroun and Thomas Roiseux (group 8)"
 date: "`r Sys.Date()`"
 output: pdf_document
