@@ -9,6 +9,5 @@ source("read_data.R")
 ```
 \rule{\linewidth}{0.1pt}
 \section{General information}
-\subsection{Nature of the problem}
-
-\subsection{Variables available}
+Genetic data hold important information about living beings.
+These information can be used to understand and even predict the ability of a species, or an individual, to protect itself from a specific disease.
