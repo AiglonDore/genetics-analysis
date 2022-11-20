@@ -1,9 +1,9 @@
 ---
-title: "Statistical analysis: rice phenotype"
+title: "Statistical analysis: rice phenotype -- biology project"
 author: "Houda Aiboud Benchekroun and Thomas Roiseux (group 8)"
 date: "`r Sys.Date()`"
 output: pdf_document
-header-includes: \usepackage{booktabs}\usepackage{float}
+header-includes: \usepackage{booktabs}\usepackage{float}\usepackage{array}\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
 ---
 ```{r loaddata, echo=FALSE, results='hide'}
 source("read_data.R")
@@ -19,36 +19,34 @@ As rice is one of the basics in food in several countries, it production must be
 \par
 To understand that, we are going to study phenotypic characters and explain them using genetic data coming from the genotype of this rice species, named \emph{Oryza sativa}.
 \section{Variables available}
-\subsection{Genotype}
-The data set we have is made of two different parts: we have a genotype set and a phenotype set.
-The phenotype data set holds data about expressed characters of the rice, whereas the genotype dataset holds all available alleles for rice genes.
-413 accessions have been sampled in this data set, referenced in their genotype.
-The genotype and its variables will be used as explanatory variables, as genes and alleles grant different visible characteristics to the rice.
-The 413 samples included in this data set reflect the 413 accessions from the total of genotyping rice species, that have grown across the planet \hyperref[fig:map]{(Figure~\ref*{fig:map})}.
+\subsection{Genomes}
+The data set we have is made of two different parts: we have a genome set and a phenotype set.
+The phenotype data set holds data about expressed characters of the rice, whereas the genome dataset holds all available alleles for rice genes.
+413 accessions have been sampled in this data set, referenced in their genome.
+The genomes and its variables will be used as explanatory variables, as genes and alleles grant different visible characteristics to the rice.
+The 413 samples included in this data set reflect the 413 accessions from the total of sampling the rice species genomes, that have grown across the planet \hyperref[fig:map]{(Figure~\ref*{fig:map})}.
 \begin{figure}[H]
 \centering
 \includegraphics{carte.png}
 \caption{World map with all locations where the rice has grown}
 \label{fig:map}
 \end{figure}
-This map shows the repartition of the 413 species used to make the data set.
+This map shows the distribution of the 413 species used to make the data set.
 \par
-These variables, crossed with the genetics markers will provide explanations to the rice phenotype. With these explanatory variables, we have three other ones:
-\begin{table}[H]
+These variables, crossed with the genetics markers will provide explanations to the rice phenotype. They are all gathered in the \texttt{Xmat} matrix: in this matrix, each column is a genetic marker, and each row represents a specific accession of the rice.
+using this matrix, we know all the genetic data of each rice species. This will be important to understand and explain the phenotype.
+\begin{figure}[H]
 \centering
-\begin{tabular}{@{}|c|c|@{}}
-\toprule
-\ttfamily marker& Name of the marker, used to differentiate the genes.\\
-\midrule
-\ttfamily chrom& Reference to the chromosome that holds the gene.\\
-\midrule
-\ttfamily pos& Position of the gene among the chromosome.\\
-\bottomrule
-\end{tabular}
-\caption{Details of explanatory variables hold in \texttt{geno.df}}
-\label{tab:genodf}
-\end{table}
-As shown in \hyperref[tab:genodf]{Table~\ref*{tab:genodf}}, the genotypic data set includes three other variables, that are used to understand which genetic marker is present or not on each rice species, as these markers will be very useful to understand the phenotypes.\par
-Then, all explanatory variables are grouped into a single matrix.
+\includegraphics{corrplot.png}
+\caption{Correlation matrix for the first 10 explanatory variables}
+\label{fig:corrplot}
+\end{figure}
+Using this plot of the correlation matrix on \hyperref[fig:corrplot]{Figure~\ref*{fig:corrplot}},
+we can assume that we will select variables as, when using only ten variables, we can already notice strong correlation between some of them, like between \texttt{id1000001} and \texttt{id1000003}.
 \subsection{Phenotype}
-We also have 36 available phenotypic variables, coming from several visible characters of this rice.
+Phenotype holds all the visible and expressed characteristics of an individual, coming from its genetic information.
+This means that the phenotype directly depends on the genome of the individual, which is described and specified above.\par
+In this data set, we are going to explain how the genetic information from the genomes can influence the protein content, hold in the \texttt{Protein.content} variable of the phenotype,
+and try to find which genes are mostly important to this characteristic.
+\par
+This variable is quite important in determining the final quality of the rice: the more protein there is, the best the rice will be. Using classification methods, we will try to find the genes that contributes to a higher level of protein in the rice.
