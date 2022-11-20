@@ -4,6 +4,7 @@ author: "Houda Aiboud Benchekroun and Thomas Roiseux (group 8)"
 date: "`r Sys.Date()`"
 output: pdf_document
 header-includes: \usepackage{booktabs}\usepackage{float}\usepackage{array}\newcolumntype{C}[1]{>{\centering\arraybackslash}m{#1}}
+bibliography: refs.bib 
 ---
 ```{r loaddata, echo=FALSE, results='hide'}
 source("read_data.R")
@@ -12,13 +13,13 @@ source("read_data.R")
 \section{General information}
 Genetic data hold important information about living beings.
 These information can be used to understand and even predict the ability of a species, or an individual, to protect itself from a specific disease.
-Using this and statistical tools, we may be able to find some predispositions for individuals of a population to have or a not specific disease, and by making predictions, to find the most suitable gene that will grant the best protection against several problems.
+Using this and statistical tools, we may be able to find some predispositions for individuals of a population to have or a not specific disease, and by making predictions, to find the most suitable gene that will grant the best protection against several problems.[@bushmoore2012,@ukbiobank1]
 \par
 To explore this, we will use a data set made with genetic information of rice. These have been extracted from the \href{https://www.ukbiobank.ac.uk/}{UK Bio-Bank}.
 As rice is one of the basics in food in several countries, it production must be protected to avoid any starvation in these countries. That's why studying its genetic data to protect it is quite important nowadays.
 \par
-To understand that, we are going to study phenotypic characters and explain them using genetic data coming from the genotype of this rice species, named \emph{Oryza sativa}.
-\section{Variables available}
+To understand that, we are going to study phenotypic characteristics and explain them using genetic data coming from the genome of this rice species, named \emph{Oryza sativa}.
+\section{Available variables: explantory and target ones}
 \subsection{Genomes}
 The data set we have is made of two different parts: we have a genome set and a phenotype set.
 The phenotype data set holds data about expressed characters of the rice, whereas the genome dataset holds all available alleles for rice genes.
@@ -28,7 +29,7 @@ The 413 samples included in this data set reflect the 413 accessions from the to
 \begin{figure}[H]
 \centering
 \includegraphics{carte.png}
-\caption{World map with all locations where the rice has grown}
+\caption{World map with all locations where the rice has grown[@zhao2011]}
 \label{fig:map}
 \end{figure}
 This map shows the distribution of the 413 species used to make the data set.
@@ -49,4 +50,6 @@ This means that the phenotype directly depends on the genome of the individual, 
 In this data set, we are going to explain how the genetic information from the genomes can influence the protein content, hold in the \texttt{Protein.content} variable of the phenotype,
 and try to find which genes are mostly important to this characteristic.
 \par
-This variable is quite important in determining the final quality of the rice: the more protein there is, the best the rice will be. Using classification methods, we will try to find the genes that contributes to a higher level of protein in the rice.
+This variable is quite important in determining the final quality of the rice: the more protein there is, the best the rice will be. Using classification methods, we will try to find the genes that contributes to a higher level of protein in the rice.[@zhao2011]
+\section{References}
+\bibliography{refs.bib}
