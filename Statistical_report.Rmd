@@ -3,6 +3,7 @@ title: "Statistical analysis: rice phenotype"
 author: "Houda Aiboud Benchekroun and Thomas Roiseux (group 8)"
 date: "`r Sys.Date()`"
 output: pdf_document
+header-includes: \usepackage{booktabs}\usepackage{float}
 ---
 ```{r loaddata, echo=FALSE, results='hide'}
 source("read_data.R")
@@ -16,7 +17,38 @@ Using this and statistical tools, we may be able to find some predispositions fo
 To explore this, we will use a data set made with genetic information of rice. These have been extracted from the \href{https://www.ukbiobank.ac.uk/}{UK Bio-Bank}.
 As rice is one of the basics in food in several countries, it production must be protected to avoid any starvation in these countries. That's why studying its genetic data to protect it is quite important nowadays.
 \par
-We will then try to find to understand which variables of the genetics data are useful to understand and explain the resistance of rice to certain diseases.
-\par
-But, before that, we are going to list in this paper all the variables we have and make a first analysis to determine which are target and which will be the explanation for the targets.
+To understand that, we are going to study phenotypic characters and explain them using genetic data coming from the genotype of this rice species, named \emph{Oryza sativa}.
 \section{Variables available}
+\subsection{Genotype}
+The data set we have is made of two different parts: we have a genotype set and a phenotype set.
+The phenotype data set holds data about expressed characters of the rice, whereas the genotype dataset holds all available alleles for rice genes.
+413 accessions have been sampled in this data set, referenced in their genotype.
+The genotype and its variables will be used as explanatory variables, as genes and alleles grant different visible characteristics to the rice.
+The 413 samples included in this data set reflect the 413 accessions from the total of genotyping rice species, that have grown across the planet \hyperref[fig:map]{(Figure~\ref*{fig:map})}.
+\begin{figure}[H]
+\centering
+\includegraphics{carte.png}
+\caption{World map with all locations where the rice has grown}
+\label{fig:map}
+\end{figure}
+This map shows the repartition of the 413 species used to make the data set.
+\par
+These variables, crossed with the genetics markers will provide explanations to the rice phenotype. With these explanatory variables, we have three other ones:
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}|c|c|@{}}
+\toprule
+\ttfamily marker& Name of the marker, used to differentiate the genes.\\
+\midrule
+\ttfamily chrom& Reference to the chromosome that holds the gene.\\
+\midrule
+\ttfamily pos& Position of the gene among the chromosome.\\
+\bottomrule
+\end{tabular}
+\caption{Details of explanatory variables hold in \texttt{geno.df}}
+\label{tab:genodf}
+\end{table}
+As shown in \hyperref[tab:genodf]{Table~\ref*{tab:genodf}}, the genotypic data set includes three other variables, that are used to understand which genetic marker is present or not on each rice species, as these markers will be very useful to understand the phenotypes.\par
+Then, all explanatory variables are grouped into a single matrix.
+\subsection{Phenotype}
+We also have 36 available phenotypic variables, coming from several visible characters of this rice.
