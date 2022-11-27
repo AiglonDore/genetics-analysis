@@ -3,6 +3,9 @@ title: 'RRM project: biology project'
 author: "Houda Aiboud Benchekroun and Thomas Roiseux (binomial 8)"
 date: "`r Sys.Date()`"
 output: pdf_document
+header-includes: \usepackage{siunitx}
 ---
 \rule{\linewidth}{0.1pt}
 \section{Introduction}
+In this paper, we are going to explain how genetics analysis can determine the protein content of different rice species.
+Firstly, we notice that we have \num{36902} variables but only \num{413} observations.
