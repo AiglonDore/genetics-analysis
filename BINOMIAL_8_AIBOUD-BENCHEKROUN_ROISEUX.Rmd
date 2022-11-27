@@ -1,0 +1,8 @@
+---
+title: 'RRM project: biology project'
+author: "Houda Aiboud Benchekroun and Thomas Roiseux (binomial 8)"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+\rule{\linewidth}{0.1pt}
+\section{Introduction}
