@@ -6,6 +6,7 @@ output:
   pdf_document: 
     number_sections: yes
 header-includes: \usepackage{xcolor,colortbl}\usepackage{siunitx}\usepackage{array,float,booktabs,diagbox}\sisetup{group-separator={,},group-minimum-digits={3}}\definecolor{dgreen}{RGB}{0,180,0}
+bibliography: biblio.bib
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -58,23 +59,25 @@ Using this algorithm, we had the following results:
 \caption{Validation of the previous linear model}
 \label{tab:vallm}
 \end{table}
-The results displayed in \hyperref[tab:vallm]{Table~\ref*{tab:vallm}} proves that the computed linear model fits with our data, even if it could still be improved, for example, by using a penalized regression method.
-\section{Lasso regression}
-As a second method, we are going to perform a \(\ell_1\)-penalized regression, using the Lasso algorithm.
-This time, we will perform the penalized regression directly on the original data set, without any grouping operations.
-\par
-As the Lasso algorithm requires an argument, we need to use the best \(\lambda\) parameter, that fits with our data.
-As the best value is the one that minimizes the Mean Square Error (MSE), we are going to perform a penalized generalized regression using a cross-validation to find the value that minimizes this will be our fitting \(\lambda\). 
-\par
-Then, we will use it to perform a Lasso regression, chosen method for a penalized regression.
-We chose a Lasso regression, instead of a Ridge one, to change the optimization way: \(\ell_1\) instead of \(\ell_2\). Also, as we have \num{36901} variables, a model (Lasso) that performs variable selection will be more efficient than only shrinking the data (Ridge).
+The results displayed in \hyperref[tab:vallm]{Table~\ref*{tab:vallm}} proves that the computed linear model fits with our data, even if it could still be improved.
+\section{Group-Lasso regression}
+After making a linear model with variable selection, we are now going to switch to another method, the Group-Lasso regression.
+We still assume that many covariables are correlated together so we will re-use the \(K\)-means algorithm before applying the Group-lasso method, as we already have groups of variables.\par
+This regularization method uses both \(\ell_1\) and \(\ell_2\) penalization to reveal the impact of a group of variables on our target variable.\par
+This method, as stated in literature[@glasso], can act by two different ways:
+\begin{enumerate}
+\item The first way, described in , uses overlapping groups. Each variable in a group has a specific weight, depending on the group. This means that a variable can be in several groups at the same time.
+\item Another way, where each variable can only appear once in the model, meaning that it can be only in one group. Should this group be removed, then the variable is dropped from the model, among with all other variables from the group.
+\end{enumerate}
+For the purpose of this project, we choose to use the second way to implement the Group-Lasso model.
 \section{Validating the model}
-As we have many more variables in this model (\num{36901}) than in the previous (\num{50}), we won't be able to use a cross-validation algorithm. Instead, we are going to split our data set in two parts:
+As we have the same number of variable clusters, we will also use a cross-validation with a \(K\)-fold procedure:
 \begin{enumerate}
 \item A first subset of \qty{80}{\%} of the data, that will be used as a training set.
-\item A second one, made of the remaining \qty{20}{\%} of the data, that will be the test set.
+\item A second one, made of the remaining \qty{20}{\%} data, to test our model.
 \end{enumerate}
-
+Using these data set, we will then use a \(K\)-fold procedure to check f our model is viable, regarding the current data.
 \section{Comparizon between both models}
-
-\section{Imputing the missing values}
+Using the previous models, we can now compute several indicators (BIC, AIC,~\ldots). We already have, from the models the \(R^2\) coefficients and the \(p\)-value, that we can also use to know which model fits best with our data. From that, we will be able to extract the variables that predict best our target variable.
+\section*{References}
+\bibliography{biblio.bib}
