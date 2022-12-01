@@ -2,8 +2,10 @@
 title: 'RRM project: biology project -- methodology report'
 author: "Houda Aiboud Benchekroun and Thomas Roiseux (binomial 8)"
 date: "`r Sys.Date()`"
-output: pdf_document
-header-includes: \usepackage{xcolor,colortbl}\usepackage{siunitx}\usepackage{array,float,booktabs,diagbox}\sisetup{group-separator={,},group-minimum-digits={3}}
+output: 
+  pdf_document: 
+    number_sections: yes
+header-includes: \usepackage{xcolor,colortbl}\usepackage{siunitx}\usepackage{array,float,booktabs,diagbox}\sisetup{group-separator={,},group-minimum-digits={3}}\definecolor{dgreen}{RGB}{0,180,0}
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
@@ -24,24 +26,55 @@ As we have \num{36901} explanatory variables and only \num{413} observations, we
 In this situation, we chose to use the \(K\)-means algorithm to build clusters of variables that have similarities on the rice, to reduce the number of explanatory variables.
 We chose \(K=50\) to still have a certain number of variable clusters but, smaller than the original value.\par
 On these \num{50} new variables, we apply the linear model, then we go even further by making a stepwise regression:
-```{r linmod, echo=FALSE, results='hide'}
-source("LM.R")
-```
 \begin{table}[H]
 \centering
 \begin{tabular}{@{}|>{}c|S|S|@{}}
 \toprule
 \rowcolor{cyan}\diagbox{Situation}{Value}&\multicolumn{1}{c|}{\(R^2\)}&\multicolumn{1}{c|}{\(p\)-value}\\
 \midrule
-\cellcolor{cyan}Before&\cellcolor{red}0.6878&\cellcolor{green}0.006025\\
+\cellcolor{cyan}Before&\cellcolor{red}0.71828&\cellcolor{green}3.854e-5\\
 \midrule
-\cellcolor{cyan}After&\cellcolor{red}0.589&\cellcolor{green}1.3e-9\\
+\cellcolor{cyan}After&\cellcolor{red}0.7067&\cellcolor{green}1.97e-7\\
 \bottomrule
 \end{tabular}
 \caption{\(p\)-values and \(R^2\) coefficients from the linear model, before and after the stepwise selection}
 \label{tab:lm}
 \end{table}
-According to \hyperref[tab:lm]{Table~\ref*{tab:lm}}, we notice that performing the linear model on such variable is quite correct and the stepwise variable selection further improves the model, as the \(p\)-greatly decreased. We will then confirm that using a cross-validation.
+According to \hyperref[tab:lm]{Table~\ref*{tab:lm}}, we notice that we have a good \(p\)-value and a good \(R^2\) coefficient, even before selecting groups of variables.
+This selection allows us to have even better results for the model.
 \section{Cross-validation of the linear model}
-As we have a small data set, we are going to use cross-validation to determine if the previous linear model is correct.
+As we have a small data set, we are going to use cross-validation to determine if the previous linear model is correct. To do so, we are going to use the \(K\)-fold algorithm, with \(K=25\).
+Processing this algorithm on our data set reveals that the computed model correctly fits with the data.\par
+Using this algorithm, we had the following results:
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}|c|S|@{}}
+\toprule
+\cellcolor{cyan}\(R^2\)&\cellcolor{dgreen}0.7182\\
+\midrule
+\cellcolor{cyan}\(p\)-value&\cellcolor{dgreen}3.854e-5\\
+\bottomrule
+\end{tabular}
+\caption{Validation of the previous linear model}
+\label{tab:vallm}
+\end{table}
+The results displayed in \hyperref[tab:vallm]{Table~\ref*{tab:vallm}} proves that the computed linear model fits with our data, even if it could still be improved, for example, by using a penalized regression method.
 \section{Lasso regression}
+As a second method, we are going to perform a \(\ell_1\)-penalized regression, using the Lasso algorithm.
+This time, we will perform the penalized regression directly on the original data set, without any grouping operations.
+\par
+As the Lasso algorithm requires an argument, we need to use the best \(\lambda\) parameter, that fits with our data.
+As the best value is the one that minimizes the Mean Square Error (MSE), we are going to perform a penalized generalized regression using a cross-validation to find the value that minimizes this will be our fitting \(\lambda\). 
+\par
+Then, we will use it to perform a Lasso regression, chosen method for a penalized regression.
+We chose a Lasso regression, instead of a Ridge one, to change the optimization way: \(\ell_1\) instead of \(\ell_2\). Also, as we have \num{36901} variables, a model (Lasso) that performs variable selection will be more efficient than only shrinking the data (Ridge).
+\section{Validating the model}
+As we have many more variables in this model (\num{36901}) than in the previous (\num{50}), we won't be able to use a cross-validation algorithm. Instead, we are going to split our data set in two parts:
+\begin{enumerate}
+\item A first subset of \qty{80}{\%} of the data, that will be used as a training set.
+\item A second one, made of the remaining \qty{20}{\%} of the data, that will be the test set.
+\end{enumerate}
+
+\section{Comparizon between both models}
+
+\section{Imputing the missing values}

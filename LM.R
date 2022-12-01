@@ -68,7 +68,12 @@ for (i in 1:ncol(df)){
 rm(i)
 df$Y <- pheno.df$Protein.content
 reg <- lm(Y~.,data = df)
-
 #Variable selection
 df <- na.omit(df)
 vselect <- step(reg, direction = "both")
+
+#K-fold
+library(caret)
+kfold <- trainControl(method = "cv", number = 25)
+model <- train(Y~., data = df, method = "lm", trControl = kfold)
+summary(model)
