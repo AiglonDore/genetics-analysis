@@ -1,3 +1,3 @@
 # Genetics Analysis
 
-Data science project on analysing rice phenotype.
+Data science project on analyzing rice phenotype.
