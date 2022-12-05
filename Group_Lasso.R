@@ -16,5 +16,5 @@ for (i in 1:(ncol(df) - 1))
 rm(i, reg)
 gc()
 
-betas <- abs(betas)
-sortedBetas <- sort(x = betas, index.return = TRUE, decreasing = TRUE)
+absBetas <- abs(betas)
+sortedBetas <- sort(x = absBetas, index.return = TRUE, decreasing = TRUE)
