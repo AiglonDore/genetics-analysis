@@ -67,10 +67,22 @@ for (i in 1:ncol(df)){
 }
 rm(i)
 df$Y <- pheno.df$Protein.content
-reg <- lm(Y~.,data = df)
-#Variable selection
-df <- na.omit(df)
-vselect <- step(reg, direction = "both")
+library(flexmix)
+results <- list(c(),c())
+names(results) <- c("r2","bic")
+for (i in 1:20){
+    reg <- lm(Y~.,data = df)
+    #Variable selection
+    df <- na.omit(df)
+    vselect <- step(reg, direction = "both")
+    results$r2 <- append(results$r2, summary(vselect)$r.squared)
+    results$bic <- append(results$bic, BIC(vselect))
+}
+
+print(paste("Moyenne des R2: ",mean(results$r2)))
+print(paste("Maximum des R2: ",max(results$r2)))
+print(paste("Moyenne des BIC: ",mean(results$bic)))
+print(paste("Minimum des BIC: ",max(results$bic)))
 
 #K-fold
 library(caret)

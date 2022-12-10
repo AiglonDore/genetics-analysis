@@ -44,7 +44,12 @@ gglasso.res <- gglasso(as.matrix(variables[-c(10001)]), variables[, 10001], grou
 plot(gglasso.res)
 
 library(glmnet)
+library(flexmix)
 lambda <- cv.gglasso(as.matrix(variables[-c(10001)]), variables[, 10001], group = kmeans.res$cluster, nfolds = 10)
+plot(lambda, main = "Choices of lambda")
 lambda.min <- lambda$lambda.min
-
-gglasso.opt <- gglasso(as.matrix(variables[-c(10001)]), variables[, 10001], group = kmeans.res$cluster, lambda = lambda.min)
+#Comparaison Lasso/Group-Lasso
+lasso.cv <- cv.glmnet(as.matrix(variables[-c(10001)]), variables[, 10001])
+plot(lasso.cv)
+lasso.res <- glmnet(as.matrix(variables[-c(10001)]), variables[, 10001], lambda = lasso.cv$lambda)
+plot(lasso.res)
