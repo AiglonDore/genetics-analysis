@@ -1,83 +1,168 @@
 ---
-title: 'RRM project: biology project -- methodology report'
-author: "Houda Aiboud Benchekroun and Thomas Roiseux (binomial 8)"
+title: "Analysis conclusions"
+author: "Houda Aiboud Benchekroun and Thomas Roiseux"
 date: "`r Sys.Date()`"
-output: 
-  pdf_document: 
-    number_sections: yes
-header-includes: \usepackage{xcolor,colortbl}\usepackage{siunitx}\usepackage{array,float,booktabs,diagbox}\sisetup{group-separator={,},group-minimum-digits={3}}\definecolor{dgreen}{RGB}{0,180,0}
-bibliography: biblio.bib
+output: beamer_presentation
+header-includes: \usetheme{Warsaw}\institute{ENSIIE -- MRR}
 ---
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-knitr::opts_chunk$set(results = 'hide')
+
+```{r code}
+load("project_park.RData")
+
+kmeans_init <- function(d, k) {
+    output <- list(floor(runif(n = k, min = 0, max = (d - 1))))
+    return(output)
+}
+
+kmeans_assign <- function(data, centroids) {
+    output <- list()
+    for (i in 1:(length(centroids))) {
+        x <- data[, i]
+        dist <- list()
+        for (j in 1:(length(centroids))) {
+            y <- centroids[[j]]
+            dist <- append(dist, sqrt(sum((x - y)^2)))
+        }
+        output <- append(output, which.min(dist))
+    }
+    return(output)
+}
+
+kmeans_update <- function(data, centroids, assignments) {
+    output <- list()
+    for (i in 1:(length(centroids))) {
+        x <- data[, assignments == i]
+        output <- append(output, colMeans(x))
+    }
+    return(output)
+}
+
+compare_lists <- function(a, b) {
+    if (length(a) != length(b)) {
+        return(FALSE)
+    }
+    for (i in 1:length(a)) {
+        if (a[[i]] != b[[i]]) {
+            return(FALSE)
+        }
+    }
+    return(TRUE)
+}
+
+kmeans <- function(data, k, max_iter = NULL) {
+    d <- ncol(data)
+    index <- kmeans_init(d, k)
+    centroids <- list()
+    for (i in 1:(length(index))) {
+        centroids <- append(centroids, data[, index[[i]]])
+    }
+    centroids2 <- list()
+    i <- 0
+    while (compare_lists(centroids, centroids2) || (!is.null(max_iter) && i < max_iter)) {
+        i <- i + 1
+        assignments <- kmeans_assign(data, centroids)
+        centroids2 <- centroids
+        centroids <- kmeans_update(data, centroids, assignments)
+    }
+    return(centroids)
+}
+r2 <- c()
+bic <-c()
+for (p in 1:20){
+    x <- matrix(data = kmeans(Xmat, 50), nrow = 413)
+    df <- as.data.frame(x)
+    
+    rm(x)
+    for (i in 1:ncol(df)){
+        df[, i] <- as.numeric(df[, i])
+    }
+    rm(i)
+    df$Y <- pheno.df$Protein.content
+    library(flexmix)
+    names(results) <- c("r2","bic")
+    reg <- lm(Y~.,data = df)
+    #Variable selection
+    df <- na.omit(df)
+    vselect <- step(reg, direction = "both", trace = 0)
+    r2 <- append(r2, summary(vselect)$r.squared)
+    bicTest <- BIC(vselect)
+    bic <- append(bic, bicTest)
+    if (p == 1){
+        bestBic <- bicTest
+    }
+    if (bicTest < bestBic){
+        dfKfold <- df
+        bestBic <- bicTest
+    }
+}
+
+print(paste("Moyenne des R2: ",mean(r2)))
+print(paste("Maximum des R2: ",max(r2)))
+print(paste("Moyenne des BIC: ",mean(bic)))
+print(paste("Minimum des BIC: ",min(bic)))
+
+#K-fold
+library(caret)
+kfold <- trainControl(method = "cv", number = 25)
+model <- train(Y~., data = dfKfold, method = "lm", trControl = kfold)
+summary(model)
+
+library(gglasso)
+load("project_park.RData")
+
+df <- as.data.frame(Xmat)
+for (x in 1:nrow(df)) {
+    for (y in 1:ncol(df)){
+        if (is.na(df[x,y])) {
+            df[x,y] = -1
+        }
+    }
+}
+df$Y <- pheno.df$Protein.content
+rm(Xmat, geno.df, pheno.df)
+gc()
+
+betas = c()
+
+for (i in 1:(ncol(df) - 1))
+{
+    reg <- lm(as.formula(paste("Y~",names(df)[i])), data = df)
+    betas <- c(betas, reg$coefficients[2], recursive = TRUE)
+}
+rm(i, reg)
+gc()
+
+absBetas <- abs(betas)
+sortedIndex <- order(x = absBetas, decreasing = TRUE)
+sortedBetas <- c()
+for (x in sortedIndex){
+    sortedBetas <- append(sortedBetas, betas[x])
+}
+rm(x, absBetas)
+
+library(dplyr)
+library(glmnet)
+library(flexmix)
+
+variables50 <- df[sortedIndex[1:50]]
+variables50$Y <- df$Y
+variables50 <- na.omit(variables50)
+lasso.cv <- cv.glmnet(as.matrix(variables50[-c(51)]), variables50[, 51])
+plot(lasso.cv)
+lasso.res <- glmnet(as.matrix(variables50[-c(51)]), variables50[, 51], lambda = lasso.cv$lambda)
+plot(lasso.res)
+
+lasso.res.coef <- predict.glmnet(lasso.res, type = "coefficients")
+plot(lasso.res.coef)
+
+
+tvariables50 <- t(variables50)
+kmeans.res <- kmeans(x = tvariables50[-c(51), ], centers = 10, iter.max = 100)
+gglasso.res <- gglasso(as.matrix(variables50[-c(51)]), variables50[, 51], group = kmeans.res$cluster)
+plot(gglasso.res)
+lambda <- cv.gglasso(as.matrix(variables50[-c(51)]), variables50[, 51], group = kmeans.res$cluster, nfolds = 5)
+plot(lambda, main = "Choices of lambda")
+
+gglasso.res.coef <- predict(gglasso.res, type = "class", newx = as.matrix(variables50[-c(51)]), mode = "lambda")
+plot(gglasso.res.coef)
 ```
-\rule{\linewidth}{0.1pt}
-\section{Introduction}
-In this paper, we are going to explain how genetics analysis can determine the protein content of different rice species.
-Therefore, we are going to present two methods that we will use to explain this target variable.
-Further details will be available in the section related to each method.
-But before that, for any regression model, it is usually mandatory to perform transformation on the variables.\par
-The studied case is a specific variable related to rice, its protein content, chosen among \num{38} other phenotype variables.
-We seek to unveil which genes are responsible of the protein level in the rice.
-\par
-Using this target variable and all the rice genes as explanatory variables, we are going to build a linear model, then the Lasso regression, while firstly omitting the missing values, then imputing them.
-\section{Linear model with omission of missing values}
-As we have \num{36901} explanatory variables and only \num{413} observations, we must perform some transformations on those variables before constructing a linear model.\par
-In this situation, we chose to use the \(K\)-means algorithm to build clusters of variables that have similarities on the rice, to reduce the number of explanatory variables.
-We chose \(K=50\) to still have a certain number of variable clusters but, smaller than the original value.\par
-On these \num{50} new variables, we apply the linear model, then we go even further by making a stepwise regression:
-\begin{table}[H]
-\centering
-\begin{tabular}{@{}|>{}c|S|S|@{}}
-\toprule
-\rowcolor{cyan}\diagbox{Situation}{Value}&\multicolumn{1}{c|}{\(R^2\)}&\multicolumn{1}{c|}{\(p\)-value}\\
-\midrule
-\cellcolor{cyan}Before&\cellcolor{red}0.71828&\cellcolor{green}3.854e-5\\
-\midrule
-\cellcolor{cyan}After&\cellcolor{red}0.7067&\cellcolor{green}1.97e-7\\
-\bottomrule
-\end{tabular}
-\caption{\(p\)-values and \(R^2\) coefficients from the linear model, before and after the stepwise selection}
-\label{tab:lm}
-\end{table}
-According to \hyperref[tab:lm]{Table~\ref*{tab:lm}}, we notice that we have a good \(p\)-value and a good \(R^2\) coefficient, even before selecting groups of variables.
-This selection allows us to have even better results for the model.
-\section{Cross-validation of the linear model}
-As we have a small data set, we are going to use cross-validation to determine if the previous linear model is correct. To do so, we are going to use the \(K\)-fold algorithm, with \(K=25\).
-Processing this algorithm on our data set reveals that the computed model correctly fits with the data.\par
-Using this algorithm, we had the following results:
-\begin{table}[H]
-\centering
-\begin{tabular}{@{}|c|S|@{}}
-\toprule
-\cellcolor{cyan}\(R^2\)&\cellcolor{dgreen}0.7182\\
-\midrule
-\cellcolor{cyan}\(p\)-value&\cellcolor{dgreen}3.854e-5\\
-\bottomrule
-\end{tabular}
-\caption{Validation of the previous linear model}
-\label{tab:vallm}
-\end{table}
-The results displayed in \hyperref[tab:vallm]{Table~\ref*{tab:vallm}} proves that the computed linear model fits with our data, even if it could still be improved.
-\section{Group-Lasso regression}
-After making a linear model with variable selection, we are now going to switch to another method, the Group-Lasso regression.
-We still assume that many covariables are correlated together so we will re-use the \(K\)-means algorithm before applying the Group-lasso method, as we already have groups of variables.\par
-This regularization method uses both \(\ell_1\) and \(\ell_2\) penalization to reveal the impact of a group of variables on our target variable.\par
-This method, as stated in literature[@glasso], can act by two different ways:
-\begin{enumerate}
-\item The first way, described in , uses overlapping groups. Each variable in a group has a specific weight, depending on the group. This means that a variable can be in several groups at the same time.
-\item Another way, where each variable can only appear once in the model, meaning that it can be only in one group. Should this group be removed, then the variable is dropped from the model, among with all other variables from the group.
-\end{enumerate}
-For the purpose of this project, we choose to use the second way to implement the Group-Lasso model.
-\section{Validating the model}
-As we have the same number of variable clusters, we will also use a cross-validation with a \(K\)-fold procedure:
-\begin{enumerate}
-\item A first subset of \qty{80}{\%} of the data, that will be used as a training set.
-\item A second one, made of the remaining \qty{20}{\%} data, to test our model.
-\end{enumerate}
-Using these data set, we will then use a \(K\)-fold procedure to check f our model is viable, regarding the current data.
-\section{Comparizon between both models}
-Using the previous models, we can now compute several indicators (BIC, AIC,~\ldots). We already have, from the models the \(R^2\) coefficients and the \(p\)-value, that we can also use to know which model fits best with our data. From that, we will be able to extract the variables that predict best our target variable.
-\section*{References}
-\bibliography{biblio.bib}

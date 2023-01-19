@@ -1,4 +1,3 @@
-# Loading data
 load("project_park.RData")
 
 kmeans_init <- function(d, k) {
@@ -61,17 +60,17 @@ kmeans <- function(data, k, max_iter = NULL) {
 r2 <- c()
 bic <-c()
 for (p in 1:20){
-x <- matrix(data = kmeans(Xmat, 50), nrow = 413)
-df <- as.data.frame(x)
-
-rm(x)
-for (i in 1:ncol(df)){
-    df[, i] <- as.numeric(df[, i])
-}
-rm(i)
-df$Y <- pheno.df$Protein.content
-library(flexmix)
-names(results) <- c("r2","bic")
+    x <- matrix(data = kmeans(Xmat, 50), nrow = 413)
+    df <- as.data.frame(x)
+    
+    rm(x)
+    for (i in 1:ncol(df)){
+        df[, i] <- as.numeric(df[, i])
+    }
+    rm(i)
+    df$Y <- pheno.df$Protein.content
+    library(flexmix)
+    names(results) <- c("r2","bic")
     reg <- lm(Y~.,data = df)
     #Variable selection
     df <- na.omit(df)
@@ -98,3 +97,62 @@ library(caret)
 kfold <- trainControl(method = "cv", number = 25)
 model <- train(Y~., data = dfKfold, method = "lm", trControl = kfold)
 summary(model)
+
+library(gglasso)
+load("project_park.RData")
+
+df <- as.data.frame(Xmat)
+for (x in 1:nrow(df)) {
+    for (y in 1:ncol(df)){
+        if (is.na(df[x,y])) {
+            df[x,y] = -1
+        }
+    }
+}
+df$Y <- pheno.df$Protein.content
+rm(Xmat, geno.df, pheno.df)
+gc()
+
+betas = c()
+
+for (i in 1:(ncol(df) - 1))
+{
+    reg <- lm(as.formula(paste("Y~",names(df)[i])), data = df)
+    betas <- c(betas, reg$coefficients[2], recursive = TRUE)
+}
+rm(i, reg)
+gc()
+
+absBetas <- abs(betas)
+sortedIndex <- order(x = absBetas, decreasing = TRUE)
+sortedBetas <- c()
+for (x in sortedIndex){
+    sortedBetas <- append(sortedBetas, betas[x])
+}
+rm(x, absBetas)
+
+library(dplyr)
+library(glmnet)
+library(flexmix)
+
+variables50 <- df[sortedIndex[1:50]]
+variables50$Y <- df$Y
+variables50 <- na.omit(variables50)
+lasso.cv <- cv.glmnet(as.matrix(variables50[-c(51)]), variables50[, 51])
+plot(lasso.cv)
+lasso.res <- glmnet(as.matrix(variables50[-c(51)]), variables50[, 51], lambda = lasso.cv$lambda)
+plot(lasso.res)
+
+lasso.res.coef <- predict.glmnet(lasso.res, type = "coefficients")
+plot(lasso.res.coef)
+
+
+tvariables50 <- t(variables50)
+kmeans.res <- kmeans(x = tvariables50[-c(51), ], centers = 10, iter.max = 100)
+gglasso.res <- gglasso(as.matrix(variables50[-c(51)]), variables50[, 51], group = kmeans.res$cluster)
+plot(gglasso.res)
+lambda <- cv.gglasso(as.matrix(variables50[-c(51)]), variables50[, 51], group = kmeans.res$cluster, nfolds = 5)
+plot(lambda, main = "Choices of lambda")
+
+gglasso.res.coef <- predict(gglasso.res, type = "class", newx = as.matrix(variables50[-c(51)]), mode = "lambda")
+plot(gglasso.res.coef)

@@ -1,0 +1,8 @@
+\babel@toc {english}{}\relax 
+\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@subsectionintoc {1}{1}{Context}{3}{0}{1}
+\beamer@subsectionintoc {1}{2}{Data sets}{4}{0}{1}
+\beamer@sectionintoc {2}{Analysis}{5}{0}{2}
+\beamer@subsectionintoc {2}{1}{First linear model}{5}{0}{2}
+\beamer@sectionintoc {3}{Lasso \& Group-lasso models}{8}{0}{3}
+\beamer@subsectionintoc {3}{1}{Lasso model}{8}{0}{3}
